@@ -38,7 +38,7 @@ public class App {
 			);
 
 			Crawler crawler = new Crawler(startUrl, workersCount);
-
+			crawler.go();
 		}
 		catch (ParseException | MalformedURLException e) {
 			showErrWithUsage(e.getMessage(), cliOptions);
