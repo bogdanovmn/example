@@ -16,7 +16,6 @@
             <appender-ref ref="Console"/>
         </root>
 
-        <!--<logger name="org.elasticsearch" level="error"/>-->
         <!--<logger name="org.springframework" level="error"/>-->
     </loggers>
 </configuration>

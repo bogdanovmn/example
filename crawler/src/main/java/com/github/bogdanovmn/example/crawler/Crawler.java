@@ -51,6 +51,9 @@ class Crawler {
 							page.getAllHttpUrls()
 						);
 						processed.add(page.getUrl());
+						queue.remove(page.getUrl());
+
+						LOG.info("{} urls on {}", page.getAllHttpUrls().size(), page.getUrl());
 					}
 					catch (ExecutionException e) {
 						LOG.error(e.getMessage());
@@ -62,7 +65,6 @@ class Crawler {
 				LOG.info("Total urls processed: {}", processed.size());
 				break;
 			}
-			current.forEach(queue::remove);
 			errors.addAll(queue);
 			queue.clear();
 			queue.addAll(
@@ -70,9 +72,11 @@ class Crawler {
 					.filter(url -> !processed.contains(url) && !errors.contains(url))
 					.collect(Collectors.toList())
 			);
+			current.clear();
 		}
 
 		workers.shutdownNow();
 		LOG.info("Processed: {}, errors: {}", processed.size(), errors.size());
+		LOG.info("Errors: {}", errors);
 	}
 }
