@@ -1,26 +1,30 @@
 package com.github.bogdanovmn.example.crawler;
 
-import com.github.bogdanovmn.downloadwlc.UrlContentDiscCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public class Crawler {
+class Crawler {
 	private static final Logger LOG = LogManager.getLogger(Crawler.class);
 
 	private final URL startUrl;
 	private final int workersCount;
 
-	public Crawler(URL startUrl, int workersCount) {
+	Crawler(URL startUrl, int workersCount) {
 		this.startUrl = startUrl;
 		this.workersCount = workersCount;
 	}
 
-	public void go() {
+	void go() {
 		ExecutorService workers = Executors.newFixedThreadPool(this.workersCount);
 
 		Set<URL> queue = new HashSet<>();
@@ -69,5 +73,6 @@ public class Crawler {
 		}
 
 		workers.shutdownNow();
+		LOG.info("Processed: {}, errors: {}", processed.size(), errors.size());
 	}
 }

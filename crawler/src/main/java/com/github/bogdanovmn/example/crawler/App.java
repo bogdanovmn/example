@@ -46,7 +46,7 @@ public class App {
 	}
 
 	private static void showErrWithUsage(final String message, final Options options) {
-		System.out.println(message);
+		System.out.println("Error: " + message);
 		showUsage(options);
 	}
 
