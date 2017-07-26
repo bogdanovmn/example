@@ -27,19 +27,23 @@ class Crawler {
 	void go() {
 		ExecutorService workers = Executors.newFixedThreadPool(this.workersCount);
 
-		Set<URL> queue = new HashSet<>();
+		int batchSize = 100;
+		BatchQueue<URL> queue = new BatchQueue<>(batchSize);
 		queue.add(this.startUrl);
 
 		Set<URL> errors = new HashSet<>();
 		Set<URL> processed = new HashSet<>();
 		Set<URL> current = new HashSet<>();
 
-		while (!queue.isEmpty()) {
+		while (queue.hasNext()) {
+			Set<URL> batch = new HashSet<>();
+			batch.addAll(queue.next());
+
 			try {
-				LOG.info("Processing {} urls", queue.size());
+				LOG.info("Processing next {} urls ({} in queue)", batchSize, queue.getTotal());
 
 				List<Future<HtmlPage>> fetchResult = workers.invokeAll(
-					queue.stream()
+					batch.stream()
 						.map(UrlContentGetChildsTask::new)
 						.collect(Collectors.toList())
 				);
@@ -51,7 +55,7 @@ class Crawler {
 							page.getAllHttpUrls()
 						);
 						processed.add(page.getUrl());
-						queue.remove(page.getUrl());
+						batch.remove(page.getUrl());
 
 						LOG.info("{} urls on {}", page.getAllHttpUrls().size(), page.getUrl());
 					}
@@ -65,9 +69,8 @@ class Crawler {
 				LOG.info("Total urls processed: {}", processed.size());
 				break;
 			}
-			errors.addAll(queue);
-			queue.clear();
-			queue.addAll(
+			errors.addAll(batch);
+			queue.add(
 				current.stream()
 					.filter(url -> !processed.contains(url) && !errors.contains(url))
 					.collect(Collectors.toList())

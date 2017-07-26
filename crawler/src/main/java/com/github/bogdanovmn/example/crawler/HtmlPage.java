@@ -22,6 +22,8 @@ class HtmlPage {
 
 	Set<URL> getAllHttpUrls() {
 		if (this.urls == null) {
+			String host = this.url.getProtocol() + "://" + this.url.getHost();
+
 			this.urls = new HashSet<>();
 			this.urls = Jsoup.parse(this.text).select("a").stream()
 				.map(link -> link.attr("href"))
@@ -30,7 +32,11 @@ class HtmlPage {
 					href -> {
 						URL url = null;
 						try {
-							url = new URL(href);
+							url = new URL(
+								href.startsWith("/")
+									? host + href
+									: href
+							);
 						}
 						catch (MalformedURLException e) {
 							this.badUrls.add(href);
